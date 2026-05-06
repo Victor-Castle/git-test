@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--定义Mapper映射文件的约束和基本结构-->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.victor.mapper.ClazzMapper">
+    <insert id="insert" parameterType="com.victor.pojo.Clazz">
+        INSERT INTO clazz (name, room, begin_date, end_date, master_id, subject, create_time, update_time)
+        VALUES (#{name}, #{room}, #{beginDate}, #{endDate}, #{masterId}, #{subject}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="update" parameterType="com.victor.pojo.Clazz">
+        UPDATE clazz
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="room != null and room != ''">room = #{room},</if>
+            <if test="beginDate != null">begin_date = #{beginDate},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
+            <if test="masterId != null">master_id = #{masterId},</if>
+            <if test="subject != null and subject != ''">subject = #{subject},</if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM clazz WHERE id = #{id}
+    </delete>
+
+    <select id="list" resultType="com.victor.pojo.Clazz">
+        SELECT
+        c.id,
+        c.name,
+        c.room,
+        c.begin_date,
+        c.end_date,
+        c.master_id,
+        c.subject,
+        c.create_time,
+        e.name as masterName,
+        CASE
+        WHEN CURDATE() &gt;  c.end_date THEN '已结课'
+        When CURDATE() &lt; c.begin_date then '未开班'
+        ELSE '在读中'
+        END AS status
+        FROM clazz c
+        LEFT JOIN emp e ON c.master_id = e.id
+        <where>
+            <if test="name != null and name != ''">
+                AND c.name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="begin != null and end != null">
+                AND c.begin_date between #{begin} and #{end}
+            </if>
+        </where>
+        ORDER BY c.update_time DESC
+
+    </select>
+    <select id="selectByPrimaryKey" resultType="com.victor.pojo.Clazz">
+        SELECT
+        id,
+        name,
+        room,
+        begin_date,
+        end_date,
+        master_id,
+        subject,
+        create_time,
+        update_time
+        FROM clazz
+        WHERE id = #{id}
+    </select>
+    <select id="getList" resultType="com.victor.pojo.Clazz">
+        SELECT
+        id,
+        name,
+        room,
+        begin_date,
+        end_date,
+        master_id,
+        subject,
+        create_time,
+        update_time
+        FROM clazz
+    </select>
+</mapper>
